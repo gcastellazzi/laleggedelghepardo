@@ -11,7 +11,8 @@ https://gcastellazzi.github.io/laleggedelghepardo/
 ```
 
 La pubblicazione e' configurata con GitHub Actions in `.github/workflows/pages.yml`.
-Dopo il push su `main`, abilita GitHub Pages nelle impostazioni del repository scegliendo `GitHub Actions` come sorgente di build e deploy, se non e' gia' attivo.
+Dopo il push su `main`, il workflow prova ad abilitare GitHub Pages e a usare `GitHub Actions` come sorgente di build e deploy.
+Se il primo deploy fallisce per permessi, abilita GitHub Pages nelle impostazioni del repository scegliendo `GitHub Actions`.
 
 ## Avvio
 
