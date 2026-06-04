@@ -106,7 +106,7 @@ Esercizio di lettura libera:
 
 - `Lettura libera - storie e curiosita'`
 
-I testi sono storie da oltre 200 parole e sono definiti in `app.js`, nella costante `exercises`.
+I testi sono storie da oltre 200 parole e sono definiti in `app-main.js`, nella costante `exercises`.
 La categoria `Storie e curiosita'` include anche partite immaginarie in stile mondiale tra nazionali famose e curiosità su mare, spazio, preistoria e cucina.
 
 Le nuove categorie seguono i protocolli comuni di allenamento alla lettura per bambini con DSA: lavoro sui gruppi consonantici e sui suoni complessi, sulle consonanti doppie, sull'accento tonico e sulla discriminazione delle lettere che si confondono (b/d/p/q). I testi nuovi usano le lettere accentate corrette (è, é, à, ò, ù, ì) per allenare anche il riconoscimento dell'accento.
