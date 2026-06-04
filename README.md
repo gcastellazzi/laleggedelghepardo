@@ -4,20 +4,12 @@ Piccola app browser per aiutare un bambino a esercitarsi nella lettura.
 
 ## Versione web
 
-L'app e' pubblicabile con GitHub Pages ed e' pensata per essere aperta da:
+L'app e' pubblicata con GitHub Pages:
 
-```text
-https://gcastellazzi.github.io/laleggedelghepardo/
-```
+[Apri La Legge del Ghepardo](https://gcastellazzi.github.io/laleggedelghepardo/)
 
-Per pubblicarla, abilita GitHub Pages nelle impostazioni del repository:
-
-1. apri `Settings` -> `Pages`;
-2. in `Build and deployment`, scegli `Source: Deploy from a branch`;
-3. scegli `Branch: main` e cartella `/ (root)`;
-4. salva.
-
-Dopo qualche minuto GitHub pubblichera' `index.html` dalla root del repository.
+La pubblicazione e' configurata con GitHub Actions in `.github/workflows/pages.yml`.
+Dopo ogni push su `main`, GitHub Pages aggiorna il sito con `index.html`, `styles.css` e `app-main.js`.
 
 ## Avvio
 
