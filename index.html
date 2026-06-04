@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>La Legge del Ghepardo</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <section class="setup" id="setupPanel" aria-labelledby="appTitle">
+        <div class="brand">
+          <p class="eyebrow">Allenamento lettura</p>
+          <div class="brandTitleRow">
+            <h1 id="appTitle" class="appTitle">
+              <span>La</span>
+              <span class="titleBig">Legge</span>
+              <span>del</span>
+              <span class="titleBig">Ghepardo</span>
+            </h1>
+            <div class="cheetahMark" aria-hidden="true">
+              <span class="cheetahBody"></span>
+              <span class="cheetahHead"></span>
+              <span class="cheetahTail"></span>
+              <span class="cheetahLeg legOne"></span>
+              <span class="cheetahLeg legTwo"></span>
+              <span class="cheetahLeg legThree"></span>
+              <span class="cheetahLeg legFour"></span>
+            </div>
+          </div>
+          <p class="intro">Scegli una storia, prepara una sezione breve o lunga e accompagna la lettura segnando gli errori con un click.</p>
+        </div>
+
+        <div class="controls">
+          <label class="field">
+            <span>Nome del piccolo lettore</span>
+            <input id="readerNameInput" list="readerNames" type="text" autocomplete="off" placeholder="Es. Tommy">
+            <datalist id="readerNames"></datalist>
+          </label>
+
+          <label class="field">
+            <span>Tipo di esercizio</span>
+            <select id="exerciseSelect"></select>
+          </label>
+
+          <label class="field">
+            <span>Testo</span>
+            <select id="textSelect"></select>
+          </label>
+
+          <label class="field">
+            <span>Parole da leggere</span>
+            <select id="wordCountSelect">
+              <option value="25">25 parole</option>
+              <option value="50">50 parole</option>
+              <option value="100">100 parole</option>
+              <option value="150">150 parole</option>
+              <option value="200">200 parole</option>
+              <option value="all">Tutta la storia</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Sillabe al secondo: <strong id="speedValue">2.0</strong></span>
+            <input id="speedInput" type="range" min="0.5" max="5" step="0.1" value="2.0">
+          </label>
+
+          <label class="field">
+            <span>Dimensione testo: <strong id="fontSizeValue">28</strong> px</span>
+            <input id="fontSizeInput" type="range" min="12" max="46" step="2" value="28">
+          </label>
+
+          <div class="sampleBox" id="sampleBox">
+            <span class="sampleWord active">cucina</span>
+            <span class="sampleWord">chiave</span>
+            <span class="sampleWord">gnomo</span>
+          </div>
+
+          <div class="sectionPicker" id="sectionPicker">
+            <button class="iconButton" id="prevSectionButton" type="button" aria-label="Sezione precedente">&lt;</button>
+            <div>
+              <strong id="sectionLabel">Sezione 1</strong>
+              <span id="sectionRange">Parole 1-25</span>
+            </div>
+            <button class="iconButton" id="nextSectionButton" type="button" aria-label="Sezione successiva">&gt;</button>
+          </div>
+
+          <div class="preview" id="previewText"></div>
+        </div>
+
+        <div class="setupActions">
+          <button class="secondary" id="settingsButton" type="button">Impostazioni</button>
+          <button class="secondary" id="historyButton" type="button">Vedi risultati</button>
+          <button class="primary" id="startButton" type="button">Inizia lettura</button>
+        </div>
+      </section>
+
+      <section class="settings hidden" id="settingsPanel" aria-labelledby="settingsTitle">
+        <div>
+          <p class="eyebrow">Impostazioni</p>
+          <h2 id="settingsTitle">Aiuti visivi e font</h2>
+          <p class="settingsIntro">Scegli quanto rendere visibili parole ed errori e prova il font piu' comodo per il piccolo lettore.</p>
+        </div>
+
+        <div class="settingsGrid">
+          <label class="toggleRow">
+            <input id="wordBackgroundToggle" type="checkbox">
+            <span>
+              <strong>Campitura sotto alle parole</strong>
+              <small>Aggiunge uno sfondo azzurro leggero alle parole non evidenziate.</small>
+            </span>
+          </label>
+
+          <label class="toggleRow">
+            <input id="errorHighlightToggle" type="checkbox">
+            <span>
+              <strong>Segna visivamente gli errori</strong>
+              <small>Mostra un bordo rosso sulle parole cliccate come errore.</small>
+            </span>
+          </label>
+
+          <label class="toggleRow">
+            <input id="hidePastWordsToggle" type="checkbox">
+            <span>
+              <strong>Nascondi del tutto le parole lette</strong>
+              <small>Le parole gia' lette spariscono invece di restare grigio chiaro.</small>
+            </span>
+          </label>
+
+          <label class="toggleRow">
+            <input id="extendedFontRangeToggle" type="checkbox">
+            <span>
+              <strong>Estendi dimensione testo</strong>
+              <small>Permette di aumentare il testo fino a 72 px invece del limite normale di 46 px.</small>
+            </span>
+          </label>
+
+          <label class="field">
+            <span>Font per la lettura</span>
+            <select id="readingFontSelect">
+              <option value="arial">Arial, consigliato</option>
+              <option value="verdana">Verdana</option>
+              <option value="tahoma">Tahoma</option>
+              <option value="trebuchet">Trebuchet MS</option>
+              <option value="comic">Comic Sans MS</option>
+              <option value="century">Century Gothic</option>
+              <option value="calibri">Calibri</option>
+              <option value="open-sans">Open Sans, se installato</option>
+              <option value="system">Sistema semplice</option>
+            </select>
+            <small>Usa font senza grazie e ben spaziati; la scelta viene applicata a esempio, anteprima e testo di lettura.</small>
+          </label>
+
+          <div class="settingsPreview">
+            <span class="sampleWord active">cucina</span>
+            <span class="sampleWord error">chiave</span>
+            <span class="sampleWord">gnomo</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="backFromSettingsButton" type="button">Torna</button>
+        </div>
+      </section>
+
+      <section class="reader hidden" id="readerPanel" aria-live="polite">
+        <div class="readerTop">
+          <div>
+            <p class="eyebrow" id="activeExercise">Lettura</p>
+            <h2 id="activeTitle">Testo</h2>
+            <p class="readerName" id="activeReader">Lettore</p>
+          </div>
+          <div class="stats">
+            <span><strong id="timer">0:00</strong> tempo</span>
+            <span><strong id="errorCount">0</strong> errori</span>
+          </div>
+        </div>
+
+        <div class="readingArea" id="readingArea" role="button" tabindex="0" aria-label="Clicca sulla parola sbagliata">
+          <div class="textDisplay" id="textDisplay"></div>
+          <div class="countdownOverlay hidden" id="countdownOverlay" aria-live="assertive">
+            <span id="countdownValue">3</span>
+            <strong id="countdownLabel">Preparati</strong>
+          </div>
+          <div class="tapHint">Click o tap sulla parola sbagliata. Sullo sfondo = parola evidenziata.</div>
+        </div>
+
+        <div class="actions">
+          <button class="secondary" id="pauseButton" type="button">Pausa</button>
+          <button class="primary" id="finishButton" type="button">Finisci lettura</button>
+        </div>
+      </section>
+
+      <section class="result hidden" id="resultPanel" aria-labelledby="resultTitle">
+        <div class="confettiLayer" id="confettiLayer" aria-hidden="true"></div>
+        <div class="specialAwardOverlay hidden" id="specialAwardOverlay" aria-live="assertive">
+          <div class="specialAwardCard">
+            <div class="trophy specialTrophy" aria-hidden="true">
+              <span class="trophyCup"></span>
+              <span class="trophyStem"></span>
+              <span class="trophyBase"></span>
+            </div>
+            <p class="eyebrow">Premio speciale</p>
+            <h2 id="specialAwardTitle">Cinque coppe d'oro!</h2>
+            <p id="specialAwardMessage">Una super coppa per il piccolo lettore.</p>
+            <button class="primary" id="closeSpecialAwardButton" type="button">Continua</button>
+          </div>
+        </div>
+        <p class="eyebrow">Risultato</p>
+        <h2 id="resultTitle">Lettura completata</h2>
+        <div class="award hidden" id="awardBox">
+          <div class="trophy" id="trophyIcon" aria-hidden="true">
+            <span class="trophyCup"></span>
+            <span class="trophyStem"></span>
+            <span class="trophyBase"></span>
+          </div>
+          <div>
+            <strong id="awardTitle">Bravo!</strong>
+            <p id="awardMessage">Hai completato la lettura.</p>
+          </div>
+        </div>
+        <div class="animalSurprise hidden" id="animalSurprise" aria-live="polite">
+          <span id="animalIcon" aria-hidden="true">🐆</span>
+          <div>
+            <strong id="animalTitle">Animale sorpresa</strong>
+            <p id="animalMessage">Un animale esotico festeggia con te.</p>
+          </div>
+        </div>
+        <div class="score" id="scoreValue">0</div>
+        <div class="resultGrid">
+          <div>
+            <span>Lettore</span>
+            <strong id="finalReader">-</strong>
+          </div>
+          <div>
+            <span>Tempo</span>
+            <strong id="finalTime">0:00</strong>
+          </div>
+          <div>
+            <span>Parole lette</span>
+            <strong id="finalWords">0</strong>
+          </div>
+          <div>
+            <span>Velocità</span>
+            <strong id="finalSpeed">0 parole/min</strong>
+          </div>
+          <div>
+            <span>Errori</span>
+            <strong id="finalErrors">0</strong>
+          </div>
+        </div>
+        <p class="resultText" id="scoreExplanation"></p>
+        <div class="mistakeBox" id="resultMistakeBox">
+          <h3>Parole da ripassare</h3>
+          <div class="wordChips" id="resultMistakeWords"></div>
+        </div>
+        <div class="actions center">
+          <button class="secondary" id="downloadResultButton" type="button">Scarica resoconto</button>
+          <button class="secondary" id="resultHistoryButton" type="button">Vedi grafico</button>
+          <button class="primary" id="restartButton" type="button">Nuova lettura</button>
+        </div>
+      </section>
+
+      <section class="history hidden" id="historyPanel" aria-labelledby="historyTitle">
+        <div class="historyTop">
+          <div>
+            <p class="eyebrow">Storico</p>
+            <h2 id="historyTitle">Risultati</h2>
+          </div>
+          <div class="historyFilters">
+            <label class="field compact">
+              <span>Lettore</span>
+              <select id="historyReaderSelect"></select>
+            </label>
+            <label class="field compact">
+              <span>Grafico</span>
+              <select id="historyPeriodSelect">
+                <option value="day">Giornaliero</option>
+                <option value="week">Settimanale</option>
+                <option value="month">Mensile</option>
+                <option value="year">Annuale</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <canvas class="chart" id="historyChart" width="900" height="320" aria-label="Grafico risultati"></canvas>
+        <div class="historyEmpty hidden" id="historyEmpty">Ancora nessun risultato salvato.</div>
+        <div class="mistakeBox" id="historyMistakeBox">
+          <h3>Parole sbagliate piu' spesso</h3>
+          <div class="wordChips" id="historyMistakeWords"></div>
+        </div>
+        <div class="historyTableWrap">
+          <table class="historyTable">
+            <thead>
+              <tr>
+                <th>Periodo</th>
+                <th>Lettore</th>
+                <th>Letture</th>
+                <th>Media</th>
+                <th>Parole/min</th>
+                <th>Errori</th>
+                <th>Parole</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody"></tbody>
+          </table>
+        </div>
+        <h3 class="sectionHeading">Resoconti delle singole letture</h3>
+        <div class="historyTableWrap">
+          <table class="historyTable reportTable">
+            <thead>
+              <tr>
+                <th>Data/Ora</th>
+                <th>Lettore</th>
+                <th>Testo</th>
+                <th>Sezione</th>
+                <th>Parole</th>
+                <th>Tempo</th>
+                <th>Media</th>
+                <th>Errori</th>
+                <th>Punteggio</th>
+                <th>Parole sbagliate</th>
+              </tr>
+            </thead>
+            <tbody id="reportTableBody"></tbody>
+          </table>
+        </div>
+        <div class="actions">
+          <button class="secondary" id="downloadReportsButton" type="button">Scarica resoconti CSV</button>
+          <button class="secondary" id="clearHistoryButton" type="button">Cancella storico</button>
+          <button class="primary" id="backToSetupButton" type="button">Torna</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
