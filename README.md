@@ -2,6 +2,17 @@
 
 Piccola app browser per aiutare un bambino a esercitarsi nella lettura.
 
+## Versione web
+
+L'app e' pubblicabile con GitHub Pages ed e' pensata per essere aperta da:
+
+```text
+https://gcastellazzi.github.io/laleggedelghepardo/
+```
+
+La pubblicazione e' configurata con GitHub Actions in `.github/workflows/pages.yml`.
+Dopo il push su `main`, abilita GitHub Pages nelle impostazioni del repository scegliendo `GitHub Actions` come sorgente di build e deploy, se non e' gia' attivo.
+
 ## Avvio
 
 Apri `index.html` con un browser moderno.
