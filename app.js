@@ -7,6 +7,7 @@ const exercises = [
   {
     id: "ca-co-cu-cia-cio-ciu",
     name: "CA CO CU CIA CIO CIU",
+    label: "Suoni C - CA CO CU, CIA CIO CIU",
     texts: [
       {
         title: "La cucina di Cico",
@@ -79,6 +80,7 @@ const exercises = [
   {
     id: "ci-ce-gi-ge-chi-che-ghi-ghe",
     name: "CI CE GI GE, CHI CHE GHI GHE",
+    label: "Suoni C/G - CI CE GI GE, CHI CHE GHI GHE",
     texts: [
       {
         title: "Gigi e il ghiaccio",
@@ -156,6 +158,7 @@ const exercises = [
   {
     id: "gn",
     name: "GN",
+    label: "Digramma GN - gnomo, pigna, ragno",
     texts: [
       {
         title: "Lo gnomo nel giardino",
@@ -229,6 +232,7 @@ const exercises = [
   {
     id: "storie-curiosita",
     name: "Storie e curiosita'",
+    label: "Lettura libera - storie e curiosita'",
     texts: [
       {
         title: "Il viaggio tra i pianeti",
@@ -497,6 +501,7 @@ const exercises = [
   {
     id: "sc-gl-qu",
     name: "SC SCE SCI, GL, QU",
+    label: "Suoni complessi - SC SCE SCI, GL, QU",
     texts: [
       {
         title: "Lo scoiattolo Scintilla",
@@ -547,6 +552,7 @@ const exercises = [
   {
     id: "doppie",
     name: "Consonanti doppie",
+    label: "Consonanti doppie - palla, gatto, nonna",
     texts: [
       {
         title: "Il gatto Tobby e la palla rossa",
@@ -597,6 +603,7 @@ const exercises = [
   {
     id: "accenti",
     name: "Accenti e parole tronche",
+    label: "Accenti e parole tronche - citta', perche', caffe'",
     texts: [
       {
         title: "Il viaggio di papà in città",
@@ -648,6 +655,7 @@ const exercises = [
   {
     id: "lettere-simili",
     name: "Lettere che si confondono (b d p q)",
+    label: "Lettere simili - b, d, p, q",
     texts: [
       {
         title: "Bobo, Dado e il baule",
@@ -697,6 +705,26 @@ const exercises = [
     ]
   }
 ];
+
+const exerciseOrder = [
+  "ca-co-cu-cia-cio-ciu",
+  "ci-ce-gi-ge-chi-che-ghi-ghe",
+  "gn",
+  "sc-gl-qu",
+  "doppie",
+  "accenti",
+  "lettere-simili",
+  "storie-curiosita"
+];
+
+function getExerciseOrder(exercise) {
+  const index = exerciseOrder.indexOf(exercise.id);
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+}
+
+exercises.sort((firstExercise, secondExercise) => {
+  return getExerciseOrder(firstExercise) - getExerciseOrder(secondExercise);
+});
 
 const state = {
   words: [],
@@ -813,7 +841,7 @@ function init() {
   exercises.forEach((exercise, index) => {
     const option = document.createElement("option");
     option.value = String(index);
-    option.textContent = exercise.name;
+    option.textContent = exercise.label || exercise.name;
     exerciseSelect.append(option);
   });
 

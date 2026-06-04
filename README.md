@@ -91,20 +91,20 @@ Il pulsante `Scarica resoconti CSV` esporta i resoconti filtrati. Dopo ogni lett
 
 Esercizi sui suoni e sui gruppi di lettere (digrammi e trigrammi):
 
-- `CA CO CU CIA CIO CIU`
-- `CI CE GI GE, CHI CHE GHI GHE`
-- `GN`
-- `SC SCE SCI, GL, QU`
+- `Suoni C - CA CO CU, CIA CIO CIU`
+- `Suoni C/G - CI CE GI GE, CHI CHE GHI GHE`
+- `Digramma GN - gnomo, pigna, ragno`
+- `Suoni complessi - SC SCE SCI, GL, QU`
 
 Esercizi su difficoltà ortografiche comuni nella lettura per bambini con DSA:
 
-- `Consonanti doppie` (parole con lettere doppie: palla, gatto, nonna...)
-- `Accenti e parole tronche` (accento tonico e parole accentate: città, perché, però, caffè...)
-- `Lettere che si confondono (b d p q)` (discriminazione visiva delle lettere speculari)
+- `Consonanti doppie - palla, gatto, nonna`
+- `Accenti e parole tronche - citta', perche', caffe'`
+- `Lettere simili - b, d, p, q`
 
 Esercizio di lettura libera:
 
-- `Storie e curiosita'`
+- `Lettura libera - storie e curiosita'`
 
 I testi sono storie da oltre 200 parole e sono definiti in `app.js`, nella costante `exercises`.
 La categoria `Storie e curiosita'` include anche partite immaginarie in stile mondiale tra nazionali famose e curiosità su mare, spazio, preistoria e cucina.
