@@ -10,9 +10,14 @@ L'app e' pubblicabile con GitHub Pages ed e' pensata per essere aperta da:
 https://gcastellazzi.github.io/laleggedelghepardo/
 ```
 
-La pubblicazione e' configurata con GitHub Actions in `.github/workflows/pages.yml`.
-Dopo il push su `main`, il workflow prova ad abilitare GitHub Pages e a usare `GitHub Actions` come sorgente di build e deploy.
-Se il primo deploy fallisce per permessi, abilita GitHub Pages nelle impostazioni del repository scegliendo `GitHub Actions`.
+Per pubblicarla, abilita GitHub Pages nelle impostazioni del repository:
+
+1. apri `Settings` -> `Pages`;
+2. in `Build and deployment`, scegli `Source: Deploy from a branch`;
+3. scegli `Branch: main` e cartella `/ (root)`;
+4. salva.
+
+Dopo qualche minuto GitHub pubblichera' `index.html` dalla root del repository.
 
 ## Avvio
 
