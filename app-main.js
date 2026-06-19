@@ -3,6 +3,7 @@ const LAST_READER_KEY = "tommy-read-last-reader";
 const VISUAL_SETTINGS_KEY = "tommy-read-visual-settings";
 const LENGTH_SETTINGS_KEY = "tommy-read-length-settings";
 const TEXT_READ_COUNTS_KEY = "tommy-read-text-read-counts-v1";
+const READER_PROGRESS_KEY = "tommy-read-reader-progress-v1";
 const DEFAULT_WORD_COUNT_OPTIONS = [100, 150, 200];
 let rewardAudioContext = null;
 
@@ -982,6 +983,8 @@ function init() {
 function bindEvents() {
   readerNameInput.addEventListener("input", () => {
     state.readerName = getReaderName();
+    applySavedProgressToCurrentSelection();
+    updatePreview();
   });
 
   exerciseSelect.addEventListener("change", () => {
@@ -992,13 +995,13 @@ function bindEvents() {
 
   textSelect.addEventListener("change", () => {
     state.selectedText = state.selectedExercise.texts[Number(textSelect.value)];
-    state.sectionStartIndex = 0;
+    applySavedProgressToCurrentSelection();
     updatePreview();
   });
 
   wordCountSelect.addEventListener("change", () => {
     state.requestedWordCount = wordCountSelect.value;
-    state.sectionStartIndex = 0;
+    applySavedProgressToCurrentSelection();
     updatePreview();
   });
 
@@ -1061,6 +1064,7 @@ function updateTexts() {
     textSelect.append(option);
   });
   state.selectedText = state.selectedExercise.texts[0];
+  applySavedProgressToCurrentSelection();
   updatePreview();
 }
 
@@ -1188,7 +1192,7 @@ function updateLengthSettingsFromControls() {
   localStorage.setItem(LENGTH_SETTINGS_KEY, JSON.stringify(state.lengthSettings));
   populateWordCountSelect(previousValue);
   updateSettingsControls();
-  state.sectionStartIndex = 0;
+  applySavedProgressToCurrentSelection();
   updatePreview();
 }
 
@@ -1576,6 +1580,8 @@ function finishReading() {
   };
 
   saveResult(result);
+  saveReaderProgress(result, section);
+  applySavedProgressToCurrentSelection();
   state.lastResult = result;
   updateReaderSuggestions();
 
@@ -1889,6 +1895,47 @@ function getReadableTextReadCounts() {
     .filter((item) => item.count > 0)
     .sort((first, second) => second.count - first.count || first.word.localeCompare(second.word))
     .slice(0, 12);
+}
+
+function saveReaderProgress(result, section) {
+  const progress = loadReaderProgress();
+  const key = getReaderProgressKey(result.readerName, state.selectedExercise, state.selectedText);
+  const fullCount = section.fullCount || splitWords(state.selectedText.text).length;
+  progress[key] = {
+    nextStart: section.end < fullCount ? section.end : 0,
+    updatedAt: result.createdAt,
+    requestedWords: result.requestedWords,
+    effectiveWords: result.effectiveWords,
+    textTitle: result.textTitle
+  };
+  localStorage.setItem(READER_PROGRESS_KEY, JSON.stringify(progress));
+}
+
+function applySavedProgressToCurrentSelection() {
+  if (!state.selectedExercise || !state.selectedText) {
+    state.sectionStartIndex = 0;
+    return;
+  }
+
+  const progress = loadReaderProgress();
+  const key = getReaderProgressKey(getReaderName(), state.selectedExercise, state.selectedText);
+  const saved = progress[key];
+  const allWords = splitWords(state.selectedText.text);
+  const nextStart = Math.round(Number(saved?.nextStart));
+  state.sectionStartIndex = Number.isFinite(nextStart) && nextStart > 0 && nextStart < allWords.length ? nextStart : 0;
+}
+
+function loadReaderProgress() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(READER_PROGRESS_KEY) || "{}");
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function getReaderProgressKey(readerName, exercise, text) {
+  return `${readerName || "Lettore"}::${exercise.id || exercise.name}::${text.title}`;
 }
 
 function getReaderNamesFromResults() {
@@ -2376,6 +2423,7 @@ function clearHistory() {
   if (!confirmed) return;
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(TEXT_READ_COUNTS_KEY);
+  localStorage.removeItem(READER_PROGRESS_KEY);
   updateReaderSuggestions();
   populateHistoryReaders();
   renderHistory();
