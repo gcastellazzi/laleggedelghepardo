@@ -51,8 +51,6 @@
           <label class="field">
             <span>Parole da leggere</span>
             <select id="wordCountSelect">
-              <option value="25">25 parole</option>
-              <option value="50">50 parole</option>
               <option value="100">100 parole</option>
               <option value="150">150 parole</option>
               <option value="200">200 parole</option>
@@ -149,6 +147,18 @@
               <option value="system">Sistema semplice</option>
             </select>
             <small>Usa font senza grazie e ben spaziati; la scelta viene applicata a esempio, anteprima e testo di lettura.</small>
+          </label>
+
+          <label class="field">
+            <span>Tagli parole disponibili</span>
+            <input id="wordCountOptionsInput" type="text" inputmode="numeric" placeholder="100, 150, 200">
+            <small>Scrivi i numeri separati da virgola. La voce "Tutta la storia" resta sempre disponibile.</small>
+          </label>
+
+          <label class="field">
+            <span>Parole extra nascoste</span>
+            <input id="hiddenExtraWordsInput" type="number" min="0" max="500" step="1" value="0">
+            <small>Se qui metti 50, scegliendo 100 la lettura usera' 150 parole.</small>
           </label>
 
           <div class="settingsPreview">
@@ -289,6 +299,10 @@
         <div class="mistakeBox" id="historyMistakeBox">
           <h3>Parole sbagliate piu' spesso</h3>
           <div class="wordChips" id="historyMistakeWords"></div>
+        </div>
+        <div class="mistakeBox readCountBox" id="historyReadCountBox">
+          <h3>Brani letti piu' spesso</h3>
+          <div class="wordChips" id="historyReadCounts"></div>
         </div>
         <div class="historyTableWrap">
           <table class="historyTable">

@@ -1,6 +1,9 @@
 const STORAGE_KEY = "tommy-read-results-v2";
 const LAST_READER_KEY = "tommy-read-last-reader";
 const VISUAL_SETTINGS_KEY = "tommy-read-visual-settings";
+const LENGTH_SETTINGS_KEY = "tommy-read-length-settings";
+const TEXT_READ_COUNTS_KEY = "tommy-read-text-read-counts-v1";
+const DEFAULT_WORD_COUNT_OPTIONS = [100, 150, 200];
 let rewardAudioContext = null;
 
 const exercises = [
@@ -834,6 +837,8 @@ exercises.sort((firstExercise, secondExercise) => {
   return getExerciseOrder(firstExercise) - getExerciseOrder(secondExercise);
 });
 
+orderTextsForVariety();
+
 const state = {
   words: [],
   currentIndex: -1,
@@ -841,7 +846,7 @@ const state = {
   errorIndexes: new Set(),
   syllablesPerSecond: 2.0,
   fontSize: 28,
-  requestedWordCount: "25",
+  requestedWordCount: "100",
   sectionStartIndex: 0,
   readerName: "",
   timerId: null,
@@ -860,6 +865,10 @@ const state = {
     hidePastWords: false,
     extendedFontRange: false,
     readingFont: "arial"
+  },
+  lengthSettings: {
+    wordCountOptions: DEFAULT_WORD_COUNT_OPTIONS,
+    hiddenExtraWords: 0
   },
   selectedExercise: exercises[0],
   selectedText: exercises[0].texts[0]
@@ -894,6 +903,8 @@ const errorHighlightToggle = document.querySelector("#errorHighlightToggle");
 const hidePastWordsToggle = document.querySelector("#hidePastWordsToggle");
 const extendedFontRangeToggle = document.querySelector("#extendedFontRangeToggle");
 const readingFontSelect = document.querySelector("#readingFontSelect");
+const wordCountOptionsInput = document.querySelector("#wordCountOptionsInput");
+const hiddenExtraWordsInput = document.querySelector("#hiddenExtraWordsInput");
 const backFromSettingsButton = document.querySelector("#backFromSettingsButton");
 const activeExercise = document.querySelector("#activeExercise");
 const activeTitle = document.querySelector("#activeTitle");
@@ -939,6 +950,8 @@ const historyChart = document.querySelector("#historyChart");
 const historyEmpty = document.querySelector("#historyEmpty");
 const historyMistakeBox = document.querySelector("#historyMistakeBox");
 const historyMistakeWords = document.querySelector("#historyMistakeWords");
+const historyReadCountBox = document.querySelector("#historyReadCountBox");
+const historyReadCounts = document.querySelector("#historyReadCounts");
 const historyTableBody = document.querySelector("#historyTableBody");
 const reportTableBody = document.querySelector("#reportTableBody");
 const downloadReportsButton = document.querySelector("#downloadReportsButton");
@@ -946,6 +959,9 @@ const clearHistoryButton = document.querySelector("#clearHistoryButton");
 const backToSetupButton = document.querySelector("#backToSetupButton");
 
 function init() {
+  state.lengthSettings = loadLengthSettings();
+  populateWordCountSelect();
+
   exercises.forEach((exercise, index) => {
     const option = document.createElement("option");
     option.value = String(index);
@@ -1005,6 +1021,8 @@ function bindEvents() {
   hidePastWordsToggle.addEventListener("change", updateVisualSettingsFromControls);
   extendedFontRangeToggle.addEventListener("change", updateVisualSettingsFromControls);
   readingFontSelect.addEventListener("change", updateVisualSettingsFromControls);
+  wordCountOptionsInput.addEventListener("change", updateLengthSettingsFromControls);
+  hiddenExtraWordsInput.addEventListener("input", updateLengthSettingsFromControls);
   startButton.addEventListener("click", startReading);
   historyButton.addEventListener("click", showHistory);
   pauseButton.addEventListener("click", togglePause);
@@ -1052,9 +1070,9 @@ function updatePreview() {
   const shownText = words.slice(0, 80).join(" ");
   const suffix = words.length > 80 ? " ..." : "";
   previewText.textContent = `${shownText}${suffix}`;
-  previewText.dataset.meta = `${words.length} parole selezionate su ${section.fullCount}`;
+  previewText.dataset.meta = `${section.displayCount} parole selezionate su ${section.fullCount}`;
   sectionLabel.textContent = section.isWholeStory ? "Tutta la storia" : `Sezione ${section.sectionNumber} di ${section.totalSections}`;
-  sectionRange.textContent = `Parole ${section.start + 1}-${section.end} di ${section.fullCount}`;
+  sectionRange.textContent = `Parole ${section.start + 1}-${section.displayEnd} di ${section.fullCount}`;
   sectionPicker.classList.toggle("sectionPickerDisabled", section.isWholeStory || section.totalSections <= 1);
   prevSectionButton.disabled = !section.canGoPrev;
   nextSectionButton.disabled = !section.canGoNext;
@@ -1104,12 +1122,48 @@ function loadVisualSettings() {
   }
 }
 
+function loadLengthSettings() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(LENGTH_SETTINGS_KEY) || "{}");
+    return {
+      wordCountOptions: normalizeWordCountOptions(parsed.wordCountOptions),
+      hiddenExtraWords: normalizeHiddenExtraWords(parsed.hiddenExtraWords)
+    };
+  } catch {
+    return {
+      wordCountOptions: DEFAULT_WORD_COUNT_OPTIONS,
+      hiddenExtraWords: 0
+    };
+  }
+}
+
+function populateWordCountSelect(preferredValue = state.requestedWordCount) {
+  wordCountSelect.innerHTML = "";
+  state.lengthSettings.wordCountOptions.forEach((count) => {
+    const option = document.createElement("option");
+    option.value = String(count);
+    option.textContent = `${count} parole`;
+    wordCountSelect.append(option);
+  });
+
+  const allOption = document.createElement("option");
+  allOption.value = "all";
+  allOption.textContent = "Tutta la storia";
+  wordCountSelect.append(allOption);
+
+  const values = [...wordCountSelect.options].map((option) => option.value);
+  wordCountSelect.value = values.includes(preferredValue) ? preferredValue : String(state.lengthSettings.wordCountOptions[0]);
+  state.requestedWordCount = wordCountSelect.value;
+}
+
 function updateSettingsControls() {
   wordBackgroundToggle.checked = state.visualSettings.showWordBackground;
   errorHighlightToggle.checked = state.visualSettings.showErrorMarks;
   hidePastWordsToggle.checked = state.visualSettings.hidePastWords;
   extendedFontRangeToggle.checked = state.visualSettings.extendedFontRange;
   readingFontSelect.value = normalizeReadingFont(state.visualSettings.readingFont);
+  wordCountOptionsInput.value = state.lengthSettings.wordCountOptions.join(", ");
+  hiddenExtraWordsInput.value = String(state.lengthSettings.hiddenExtraWords);
 }
 
 function updateVisualSettingsFromControls() {
@@ -1123,6 +1177,19 @@ function updateVisualSettingsFromControls() {
   localStorage.setItem(VISUAL_SETTINGS_KEY, JSON.stringify(state.visualSettings));
   applyVisualSettings();
   updateFontSize();
+}
+
+function updateLengthSettingsFromControls() {
+  const previousValue = wordCountSelect.value || state.requestedWordCount;
+  state.lengthSettings = {
+    wordCountOptions: normalizeWordCountOptions(wordCountOptionsInput.value),
+    hiddenExtraWords: normalizeHiddenExtraWords(hiddenExtraWordsInput.value)
+  };
+  localStorage.setItem(LENGTH_SETTINGS_KEY, JSON.stringify(state.lengthSettings));
+  populateWordCountSelect(previousValue);
+  updateSettingsControls();
+  state.sectionStartIndex = 0;
+  updatePreview();
 }
 
 function applyVisualSettings() {
@@ -1153,6 +1220,34 @@ function normalizeReadingFont(fontKey) {
   return allowedFonts.includes(fontKey) ? fontKey : "arial";
 }
 
+function normalizeWordCountOptions(value) {
+  const rawValues = Array.isArray(value) ? value : String(value || "").split(/[,\s;]+/);
+  const unique = new Set();
+  rawValues.forEach((item) => {
+    const count = Math.round(Number(item));
+    if (Number.isFinite(count) && count > 0 && count <= 2000) {
+      unique.add(count);
+    }
+  });
+
+  const options = [...unique].sort((a, b) => a - b);
+  return options.length ? options : [...DEFAULT_WORD_COUNT_OPTIONS];
+}
+
+function normalizeHiddenExtraWords(value) {
+  const extraWords = Math.round(Number(value));
+  if (!Number.isFinite(extraWords) || extraWords < 0) return 0;
+  return Math.min(extraWords, 500);
+}
+
+function getRequestedWordCount() {
+  return Math.max(1, Math.round(Number(wordCountSelect.value)));
+}
+
+function getEffectiveWordCount(requestedWordCount) {
+  return Math.min(2500, requestedWordCount + state.lengthSettings.hiddenExtraWords);
+}
+
 function startReading() {
   prepareRewardAudio();
   state.readerName = getReaderName();
@@ -1170,7 +1265,7 @@ function startReading() {
   state.startedAt = 0;
 
   activeExercise.textContent = state.selectedExercise.name;
-  activeTitle.textContent = `${state.selectedText.title} - ${section.isWholeStory ? "tutta la storia" : `sezione ${section.sectionNumber}`} (${state.words.length} parole)`;
+  activeTitle.textContent = `${state.selectedText.title} - ${section.isWholeStory ? "tutta la storia" : `sezione ${section.sectionNumber}`} (${section.displayCount} parole)`;
   activeReader.textContent = state.readerName;
   errorCount.textContent = "0";
   timer.textContent = "0:00";
@@ -1279,6 +1374,8 @@ function getCurrentSection() {
       words: allWords,
       start: 0,
       end: fullCount,
+      displayEnd: fullCount,
+      displayCount: fullCount,
       fullCount,
       sectionNumber: 1,
       totalSections: 1,
@@ -1288,17 +1385,21 @@ function getCurrentSection() {
     };
   }
 
-  const sectionSize = Number(wordCountSelect.value);
+  const requestedSize = getRequestedWordCount();
+  const sectionSize = getEffectiveWordCount(requestedSize);
   const totalSections = Math.max(1, Math.ceil(fullCount / sectionSize));
   const currentSectionIndex = Math.min(Math.floor(state.sectionStartIndex / sectionSize), totalSections - 1);
   const start = currentSectionIndex * sectionSize;
   const end = Math.min(start + sectionSize, fullCount);
+  const displayEnd = Math.min(start + requestedSize, fullCount);
   state.sectionStartIndex = start;
 
   return {
     words: allWords.slice(start, end),
     start,
     end,
+    displayEnd,
+    displayCount: Math.max(0, displayEnd - start),
     fullCount,
     sectionNumber: currentSectionIndex + 1,
     totalSections,
@@ -1310,7 +1411,7 @@ function getCurrentSection() {
 
 function moveSection(direction) {
   if (wordCountSelect.value === "all") return;
-  const sectionSize = Number(wordCountSelect.value);
+  const sectionSize = getEffectiveWordCount(getRequestedWordCount());
   const section = getCurrentSection();
   const nextSectionIndex = Math.max(0, Math.min(section.totalSections - 1, section.sectionNumber - 1 + direction));
   state.sectionStartIndex = nextSectionIndex * sectionSize;
@@ -1437,8 +1538,9 @@ function finishReading() {
   const errorDetails = getErrorDetails(section.start);
   const mistakeWords = getUniqueMistakeWords(errorDetails);
   const sectionLabelText = section.isWholeStory ? "Tutta la storia" : `Sezione ${section.sectionNumber}`;
-  const sectionRangeText = `Parole ${section.start + 1}-${section.end}`;
+  const sectionRangeText = `Parole ${section.start + 1}-${section.displayEnd}`;
   const awardLevel = getAwardLevel(score);
+  const textReadCount = incrementTextReadCount(state.selectedExercise, state.selectedText);
 
   const result = {
     id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -1448,8 +1550,11 @@ function finishReading() {
     exerciseName: state.selectedExercise.name,
     textTitle: state.selectedText.title,
     requestedWords: wordCountSelect.value,
+    effectiveWords: wordsRead,
+    hiddenExtraWords: wordCountSelect.value === "all" ? 0 : state.lengthSettings.hiddenExtraWords,
     sectionStart: section.start,
     sectionEnd: section.end,
+    sectionDisplayEnd: section.displayEnd,
     sectionNumber: section.sectionNumber,
     sectionLabel: sectionLabelText,
     sectionRange: sectionRangeText,
@@ -1465,6 +1570,7 @@ function finishReading() {
     totalSyllables,
     syllablesPerMinute,
     fontSize: state.fontSize,
+    textReadCount,
     awardLevel,
     score
   };
@@ -1734,6 +1840,57 @@ function loadResults() {
   }
 }
 
+function orderTextsForVariety() {
+  const readCounts = loadTextReadCounts();
+  exercises.forEach((exercise) => {
+    exercise.texts = exercise.texts
+      .map((text) => ({
+        text,
+        count: readCounts[getTextReadKey(exercise, text)] || 0,
+        tieBreaker: Math.random()
+      }))
+      .sort((first, second) => first.count - second.count || first.tieBreaker - second.tieBreaker)
+      .map((item) => item.text);
+  });
+}
+
+function incrementTextReadCount(exercise, text) {
+  const readCounts = loadTextReadCounts();
+  const key = getTextReadKey(exercise, text);
+  const nextCount = (readCounts[key] || 0) + 1;
+  readCounts[key] = nextCount;
+  localStorage.setItem(TEXT_READ_COUNTS_KEY, JSON.stringify(readCounts));
+  return nextCount;
+}
+
+function loadTextReadCounts() {
+  if (typeof localStorage === "undefined") return {};
+  try {
+    const parsed = JSON.parse(localStorage.getItem(TEXT_READ_COUNTS_KEY) || "{}");
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function getTextReadKey(exercise, text) {
+  return `${exercise.id || exercise.name}::${text.title}`;
+}
+
+function getReadableTextReadCounts() {
+  const readCounts = loadTextReadCounts();
+  return exercises
+    .flatMap((exercise) =>
+      exercise.texts.map((text) => ({
+        word: text.title,
+        count: readCounts[getTextReadKey(exercise, text)] || 0
+      }))
+    )
+    .filter((item) => item.count > 0)
+    .sort((first, second) => second.count - first.count || first.word.localeCompare(second.word))
+    .slice(0, 12);
+}
+
 function getReaderNamesFromResults() {
   return [...new Set(loadResults().map((result) => result.readerName).filter(Boolean))].sort((a, b) => a.localeCompare(b));
 }
@@ -1784,11 +1941,14 @@ function renderHistory() {
   const period = historyPeriodSelect.value || "day";
   const aggregated = aggregateResultsByPeriod(results, period);
   const mistakeSummary = aggregateMistakeWords(results);
+  const textReadSummary = getReadableTextReadCounts();
   historyTitle.textContent = getHistoryTitle(period);
 
   historyEmpty.classList.toggle("hidden", aggregated.length > 0);
   historyMistakeBox.classList.toggle("hidden", results.length === 0);
+  historyReadCountBox.classList.toggle("hidden", textReadSummary.length === 0);
   renderMistakeChips(historyMistakeWords, mistakeSummary, "Nessuna parola sbagliata salvata.");
+  renderMistakeChips(historyReadCounts, textReadSummary, "Nessun brano letto salvato.");
   historyTableBody.innerHTML = "";
   reportTableBody.innerHTML = "";
 
@@ -2215,6 +2375,7 @@ function clearHistory() {
   const confirmed = window.confirm("Cancellare tutti i risultati salvati in questo browser?");
   if (!confirmed) return;
   localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(TEXT_READ_COUNTS_KEY);
   updateReaderSuggestions();
   populateHistoryReaders();
   renderHistory();
